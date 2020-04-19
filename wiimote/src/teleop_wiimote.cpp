@@ -306,13 +306,6 @@ void TeleopWiimote::wiimoteStateCallback(const wiimote_msgs::State::ConstPtr& wi
   static const int MSG_BTN_RIGHT = 9;
   static const int MSG_BTN_HOME  = 10;
 
-  static bool one_depressed = false;
-  static bool two_depressed = false;
-  static bool plus_depressed = false;
-  static bool minus_depressed = false;
-  static bool home_depressed = false;
-
-
   // 1-Button used to set the amount of Linear Throttle
   // Pressing the button show approx setting level on the
   // Wiimote LEDs (see setLEDFeedback for levels).
@@ -323,7 +316,7 @@ void TeleopWiimote::wiimoteStateCallback(const wiimote_msgs::State::ConstPtr& wi
   {
     if (wiistate->buttons[MSG_BTN_PLUS])
     {
-      if (!plus_depressed)
+      if (!plus_depressed_)
       {
         percent_linear_throttle_ += 0.05;
         if (percent_linear_throttle_ >= 1.0)
@@ -331,7 +324,7 @@ void TeleopWiimote::wiimoteStateCallback(const wiimote_msgs::State::ConstPtr& wi
           rumbleFeedback(100000);
         }
         percent_linear_throttle_ = fmin(percent_linear_throttle_, 1.0);
-        plus_depressed = true;
+        plus_depressed_ = true;
 
         setLEDFeedback(percent_linear_throttle_ * 100.0);
 
@@ -341,11 +334,11 @@ void TeleopWiimote::wiimoteStateCallback(const wiimote_msgs::State::ConstPtr& wi
     }
     else
     {
-      plus_depressed = false;
+      plus_depressed_ = false;
 
       if (wiistate->buttons[MSG_BTN_MINUS])
       {
-        if (!minus_depressed)
+        if (!minus_depressed_)
         {
           percent_linear_throttle_ -= 0.05;
           if (percent_linear_throttle_ <= 0.1)
@@ -353,7 +346,7 @@ void TeleopWiimote::wiimoteStateCallback(const wiimote_msgs::State::ConstPtr& wi
             rumbleFeedback(100000);
           }
           percent_linear_throttle_ = fmax(percent_linear_throttle_, 0.1);
-          minus_depressed = true;
+          minus_depressed_ = true;
 
           setLEDFeedback(percent_linear_throttle_ * 100.0);
 
@@ -363,18 +356,18 @@ void TeleopWiimote::wiimoteStateCallback(const wiimote_msgs::State::ConstPtr& wi
       }
       else
       {
-        minus_depressed = false;
+        minus_depressed_ = false;
       }
     }
 
-    if (!one_depressed)
+    if (!one_depressed_)
     {
       setLEDFeedback(percent_linear_throttle_ * 100.0);
 
       nh_private.setParam("linear/x/throttle_percent", percent_linear_throttle_);
       ROS_INFO("Linear X Throttle Percent: %3.0f", percent_linear_throttle_ * 100.0);
 
-      one_depressed = true;
+      one_depressed_ = true;
     }
   }
   // 2-Button used to set the amount of Angular Throttle
@@ -383,7 +376,7 @@ void TeleopWiimote::wiimoteStateCallback(const wiimote_msgs::State::ConstPtr& wi
   {
     if (wiistate->buttons[MSG_BTN_PLUS])
     {
-      if (!plus_depressed)
+      if (!plus_depressed_)
       {
         percent_angular_throttle_ += 0.05;
         if (percent_angular_throttle_ >= 1.0)
@@ -391,7 +384,7 @@ void TeleopWiimote::wiimoteStateCallback(const wiimote_msgs::State::ConstPtr& wi
           rumbleFeedback(100000);
         }
         percent_angular_throttle_ = fmin(percent_angular_throttle_, 1.0);
-        plus_depressed = true;
+        plus_depressed_ = true;
 
         setLEDFeedback(percent_angular_throttle_ * 100.0);
 
@@ -401,11 +394,11 @@ void TeleopWiimote::wiimoteStateCallback(const wiimote_msgs::State::ConstPtr& wi
     }
     else
     {
-      plus_depressed = false;
+      plus_depressed_ = false;
 
       if (wiistate->buttons[MSG_BTN_MINUS])
       {
-        if (!minus_depressed)
+        if (!minus_depressed_)
         {
           percent_angular_throttle_ -= 0.05;
           if (percent_angular_throttle_ <= 0.1)
@@ -413,7 +406,7 @@ void TeleopWiimote::wiimoteStateCallback(const wiimote_msgs::State::ConstPtr& wi
             rumbleFeedback(100000);
           }
           percent_angular_throttle_ = fmax(percent_angular_throttle_, 0.1);
-          minus_depressed = true;
+          minus_depressed_ = true;
 
           setLEDFeedback(percent_angular_throttle_ * 100.0);
 
@@ -423,50 +416,50 @@ void TeleopWiimote::wiimoteStateCallback(const wiimote_msgs::State::ConstPtr& wi
       }
       else
       {
-        minus_depressed = false;
+        minus_depressed_ = false;
       }
     }
 
-    if (!two_depressed)
+    if (!two_depressed_)
     {
       setLEDFeedback(percent_angular_throttle_ * 100.0);
 
       nh_private.setParam("angular/x/throttle_percent", percent_angular_throttle_);
       ROS_INFO("Angular Z Throttle Percent: %3.0f", percent_angular_throttle_ * 100.0);
 
-      two_depressed = true;
+      two_depressed_ = true;
     }
   }
   else
   {
-    if (one_depressed || two_depressed)
+    if (one_depressed_ || two_depressed_)
     {
       setLEDFeedback(0.0);
     }
 
-    one_depressed = false;
-    two_depressed = false;
+    one_depressed_ = false;
+    two_depressed_ = false;
 
     // Home-Button used the Wiimote LEDs (see setLEDFeedback for levels).
     // to show the approx battery leve of the Wiimote.
     // Only works if the 1-Button or 2-Button are not in use.
     if (wiistate->buttons[MSG_BTN_HOME])
     {
-      if (!home_depressed)
+      if (!home_depressed_)
       {
         ROS_INFO("Battery[]: raw: %f, percent: %f", wiistate->raw_battery, wiistate->percent_battery);
         setLEDFeedback(wiistate->percent_battery);
-        home_depressed = true;
+        home_depressed_ = true;
       }
     }
     else
     {
-      if (home_depressed)
+      if (home_depressed_)
       {
         setLEDFeedback(0.0);
       }
 
-      home_depressed = false;
+      home_depressed_ = false;
     }
   }
 

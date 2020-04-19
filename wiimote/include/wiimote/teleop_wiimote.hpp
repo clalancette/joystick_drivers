@@ -64,6 +64,12 @@ private:
 
   bool dpad_in_use_ = false;
   bool njoy_in_use_ = false;
+
+  bool one_depressed_ = false;
+  bool two_depressed_ = false;
+  bool plus_depressed_ = false;
+  bool minus_depressed_ = false;
+  bool home_depressed_ = false;
 };
 
 #endif  // WIIMOTE_TELEOP_WIIMOTE_HPP
