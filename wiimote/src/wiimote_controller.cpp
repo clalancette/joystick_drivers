@@ -85,6 +85,9 @@ void cwiidErrorCallback(wiimote_c::cwiid_wiimote_t *wiimote, const char *fmt, va
 
 }
 
+#define zeroedByCal(raw, zero, one) \
+  (((raw - zero) * 1.0) / ((one - zero) * 1.0))
+
 WiimoteNode::WiimoteNode()
 {
   joy_pub_ = nh_.advertise<sensor_msgs::Joy>("/joy", 1);

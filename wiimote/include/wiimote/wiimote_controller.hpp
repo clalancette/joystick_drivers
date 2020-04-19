@@ -50,9 +50,6 @@ namespace wiimote_c
 #include <cwiid.h>  // libcwiid.so
 }
 
-#define zeroedByCal(raw, zero, one) \
-  (((raw - zero) * 1.0) / ((one - zero) * 1.0))
-
 class WiimoteNode final
 {
 public:
