@@ -25,11 +25,9 @@
 
 #include "ros/ros.h"
 
-#include <numeric>
-#include <functional>
 #include <algorithm>
-#include <math.h>
-
+#include <functional>
+#include <numeric>
 
 StatVector3d::StatVector3d()
 {
