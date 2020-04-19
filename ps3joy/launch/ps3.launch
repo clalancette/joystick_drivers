@@ -9,5 +9,4 @@
     <rosparam command="load" file="$(find ps3joy)/diagnostics.yaml" />
   </node>
 
-
 </launch>

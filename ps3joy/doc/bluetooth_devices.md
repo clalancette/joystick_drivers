@@ -6,7 +6,7 @@ Please report other compatible and incompatible Bluetooth adapters through a pul
 
 ### Adapters that are known to work
 
-* Cambridge Silicon Radio, Ltd Bluetooth Dongle (Bluetooth 4.0) 
+* Cambridge Silicon Radio, Ltd Bluetooth Dongle (Bluetooth 4.0)
 
 ### Adapters that are known not to work
 

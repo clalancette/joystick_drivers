@@ -8,5 +8,3 @@ analyzers:
     timeout: 5.0
     startswith: ['Battery', 'Charging State', 'Connection', 'ps3_joy']
     remove_prefix: 'ps3_joy'
-
-

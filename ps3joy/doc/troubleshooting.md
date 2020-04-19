@@ -2,20 +2,20 @@
 -------------------------
 #### Issues pairing the PS3 joystick ####
 When pairing your joystick via bluetooth, you may recieve the following message on
-your terminal:  
+your terminal:
 ```
 Current Bluetooth master: 00:15:83:ed:3f:21
 Unable to retrieve local bd_addr from `hcitool dev`.
 Please enable Bluetooth or specify an address manually.
-``` 
-This would indicate that your bluetooth is disabled. To enable your bluetooth, try the 
-following: 
+```
+This would indicate that your bluetooth is disabled. To enable your bluetooth, try the
+following:
 
-1. Check the status of your bluetooth by entering the following: 
-``` 
+1. Check the status of your bluetooth by entering the following:
+```
 sudo systemctl status bluetooth
-``` 
-You may see something like this: 
+```
+You may see something like this:
 
 ```
 ● bluetooth.service - Bluetooth service
@@ -24,12 +24,12 @@ You may see something like this:
      Docs: man:bluetoothd(8)
 ```
 
-If you do, that means your bluetooth service is disabled. Turn enable it enter 
+If you do, that means your bluetooth service is disabled. Turn enable it enter
 ```
 sudo systemctl start bluetooth
-sudo systemctl status bluetooth  
+sudo systemctl status bluetooth
 ```
-After running these commands your bluetooth service should be up and running: 
+After running these commands your bluetooth service should be up and running:
 
 ```
 ● bluetooth.service - Bluetooth service
@@ -41,14 +41,14 @@ After running these commands your bluetooth service should be up and running:
    CGroup: /system.slice/bluetooth.service
            └─27362 /usr/local/libexec/bluetooth/bluetoothd
 ```
-Retry the commands that were mentioned in step 2 for pairing the PS3 joystick. 
+Retry the commands that were mentioned in step 2 for pairing the PS3 joystick.
 
-2. Run the following command: 
-``` 
-hciconfig hci0 reset 
-``` 
-followed by: 
+2. Run the following command:
 ```
-sudo bash 
+hciconfig hci0 reset
+```
+followed by:
+```
+sudo bash
 rosrun ps3joy sixpair
-``` 
+```

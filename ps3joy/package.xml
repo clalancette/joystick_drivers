@@ -25,7 +25,7 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>roslint</build_depend>
-  
+
   <depend>bluez</depend>
   <depend>diagnostic_msgs</depend>
   <depend>joystick</depend>

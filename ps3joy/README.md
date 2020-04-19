@@ -18,7 +18,7 @@ Additional documentation:
 
 ## Pairing instructions
 
-1. If you can connect the joystick and the bluetooth dongle into the same 
+1. If you can connect the joystick and the bluetooth dongle into the same
    computer connect the joystick to the computer using a USB cable.
 
 2. Load the bluetooth dongle's MAC address into the ps3 joystick using:
@@ -41,8 +41,8 @@ sudo hciconfig hci0 up
 hciconfig
 ```
 3. Plug the PS3 joystick into some other computer using a USB cable.
-   
-4. Replace the joystick's mac address in the following command: 
+
+4. Replace the joystick's mac address in the following command:
 ```
 sudo rosrun ps3joy sixpair 01:23:45:67:89:ab
 ```
@@ -53,12 +53,12 @@ sudo rosrun ps3joy sixpair 01:23:45:67:89:ab
 ```
 rosrun ps3joy ps3joy.py
 ```
-6. Open a new terminal and reboot bluez and run joy with: 
+6. Open a new terminal and reboot bluez and run joy with:
 ```
-sudo systemctl restart bluetooth 
-rosrun joy joy_node  
+sudo systemctl restart bluetooth
+rosrun joy joy_node
 ```
-7. Open a new terminal and echo the joy topic 
+7. Open a new terminal and echo the joy topic
 ```
 rostopic echo joy
 ```
@@ -68,30 +68,30 @@ rostopic echo joy
   jstest /dev/input/js?
   (replace ? with the name of your joystick)
 
-## Command-line Options 
+## Command-line Options
 
 ### ps3joy.py
-   
+
 ```
 usage: ps3joy.py [--inactivity-timeout=<n>] [--no-disable-bluetoothd] [--redirect-output] [--continuous-output]=<f>
 <n>: inactivity timeout in seconds (saves battery life).
 <f>: file name to redirect output to.
-``` 
+```
 
-`--inactivity-timeout` 
-  This may be useful for saving battery life and reducing contention on the 2.4 GHz network.Your PS3 controller 
-  will shutdown after a given amount of time of inactivity.  
+`--inactivity-timeout`
+  This may be useful for saving battery life and reducing contention on the 2.4 GHz network.Your PS3 controller
+  will shutdown after a given amount of time of inactivity.
 
-`--no-disable-bluetoothd` 
+`--no-disable-bluetoothd`
    ps3joy.py will not take down bluetoothd. Bluetoothd must be configured to not handle input device, otherwise
-   you will receive an error saying "Error binding to socket". 
+   you will receive an error saying "Error binding to socket".
 
 `--redirect-output`
    This can be helpful when ps3joy.py is running in the backgound. This will allow the standard output
-   and error messages to redirected into a file.   
+   and error messages to redirected into a file.
 
 `--continuous-output`
-   This will output continuous motion streams and as a result this will no longer leave extended periods of 
+   This will output continuous motion streams and as a result this will no longer leave extended periods of
    no messages on the /joy topic. ( This only works for ps3joy.py. Entering this parameter in ps3joy_node.py will
    result in the parameter being ignored.)
 
