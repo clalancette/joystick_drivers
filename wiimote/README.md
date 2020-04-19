@@ -3,7 +3,7 @@
 Additional Documentation
  * [Testing procedure](doc/testing.md)
  * [ROS Wiki](http://wiki.ros.org/wiimote)
- 
+
 Tutorials
  * [Teleop with Wiimote](doc/tutorials/teleop.md)
 

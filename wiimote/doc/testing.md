@@ -145,31 +145,31 @@ Echo the output onto the screen using the same `$ rosparam echo /wiimote/state` 
 ### Topics ###
 ##### Subscribed topics #####
 * set_feedback (sensor_msgs/JoyFeedbackArray)
-*Topic where ROS clients control the Wiimote's leds and rumble (vibrator) facility.* 
+*Topic where ROS clients control the Wiimote's leds and rumble (vibrator) facility.*
 
 ##### Published Topics #####
-* joy (joy/Joy) 
+* joy (joy/Joy)
 
-   *Topic on which Wiimote accelerometer, gyro, and button data are published. Axes are: linear AccelerationX/Y/Z, followed by angular velocityX/Y/Z (a.k.a. Roll, Pitch, Yaw, a.k.a. Phi, Theta, Psi). The values are corrected to be near zero at rest. For raw values, use the State message. The Wiimote buttons are reported in the same order as in the State message*  
+   *Topic on which Wiimote accelerometer, gyro, and button data are published. Axes are: linear AccelerationX/Y/Z, followed by angular velocityX/Y/Z (a.k.a. Roll, Pitch, Yaw, a.k.a. Phi, Theta, Psi). The values are corrected to be near zero at rest. For raw values, use the State message. The Wiimote buttons are reported in the same order as in the State message*
 
-* imu/data (sensor_msgs/Imu) 
+* imu/data (sensor_msgs/Imu)
 
-   *Topic on which Wiimote gyro and accelerometer data are sent out.*  
+   *Topic on which Wiimote gyro and accelerometer data are sent out.*
 
 * wiimote/state (wiimote/State)
 
-   *Topic for comprehensive information about Wiimote state.*  
+   *Topic for comprehensive information about Wiimote state.*
 
 * wiimote/nunchuk (joy/Joy)
 
-   *Topic on which data from an attached Nunchuk are sent out, including the joystick, accelerometer and button data. Axes are: Joystick X/Y, Acceleration X/Y/Z. The buttons are Z then C. Note the spelling of the topic name does not include a 'c'.*  
+   *Topic on which data from an attached Nunchuk are sent out, including the joystick, accelerometer and button data. Axes are: Joystick X/Y, Acceleration X/Y/Z. The buttons are Z then C. Note the spelling of the topic name does not include a 'c'.*
 
 * wiimote/classic (joy/Joy)
 
-   *Topic on which data for a Wiimote classic attachment are sent out (Untested by Willow Garage).*  
+   *Topic on which data for a Wiimote classic attachment are sent out (Untested by Willow Garage).*
 
 * imu/is_calibrated (std_msgs/Bool)
 
-   *Latched topic for learning the most recent Wiimote calibration result.*  
+   *Latched topic for learning the most recent Wiimote calibration result.*
 
 
