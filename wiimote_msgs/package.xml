@@ -1,0 +1,26 @@
+<package format="2">
+  <name>wiimote_msgs</name>
+  <version>1.13.0</version>
+  <license>GPL</license>
+  <description>
+    ROS messages for the Wiimote remote control.
+  </description>
+
+  <url type="website">http://www.ros.org/wiki/wiimote_msgs</url>
+  <url type="development">https://github.com/ros-drivers/joystick_drivers</url>
+  <url type="bugtracker">https://github.com/ros-drivers/joystick_drivers/issues</url>
+
+  <maintainer email="clalancette@openrobotics.org">Chris Lalancette</maintainer>
+  <author>Andreas Paepcke</author>
+  <author>Melonee Wise</author>
+  <author email="mark.d.horn@intel.com">Mark Horn</author>
+  <author email="jbo@jhu.edu">Jonathan Bohren</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+</package>

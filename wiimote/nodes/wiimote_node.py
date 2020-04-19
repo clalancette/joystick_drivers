@@ -84,8 +84,8 @@ from std_msgs.msg import Bool
 from sensor_msgs.msg import Joy
 from sensor_msgs.msg import JoyFeedback
 from sensor_msgs.msg import JoyFeedbackArray
-from wiimote.msg import IrSourceInfo
-from wiimote.msg import State
+from wiimote_msgs.msg import IrSourceInfo
+from wiimote_msgs.msg import State
 
 from wiimote.wiimoteExceptions import *
 from wiimote.wiimoteConstants import *

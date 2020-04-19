@@ -26,7 +26,7 @@
 
 #include "ros/ros.h"
 #include "sensor_msgs/Joy.h"
-#include "wiimote/State.h"
+#include "wiimote_msgs/State.h"
 
 #include <math.h>
 
@@ -48,7 +48,7 @@ private:
   void rumbleFeedback(int useconds);
   void setLEDFeedback(double value);
   void joyCallback(const sensor_msgs::Joy::ConstPtr& joy);
-  void wiimoteStateCallback(const wiimote::State::ConstPtr& wiistate);
+  void wiimoteStateCallback(const wiimote_msgs::State::ConstPtr& wiistate);
 
   double linear_x_max_velocity_;   // m/s
   double linear_x_min_velocity_;   // m/s
