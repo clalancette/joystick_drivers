@@ -43,7 +43,7 @@
 #include "std_srvs/Empty.h"
 #include "sensor_msgs/Imu.h"
 
-#include "wiimote/stat_vector_3d.h"
+#include "wiimote/stat_vector_3d.hpp"
 
 // We need to link against these
 #include <bluetooth/bluetooth.h>  // libbluetooth.so

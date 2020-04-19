@@ -21,7 +21,7 @@
  *
  */
 
-#include "wiimote/stat_vector_3d.h"
+#include "wiimote/stat_vector_3d.hpp"
 
 #include "ros/ros.h"
 

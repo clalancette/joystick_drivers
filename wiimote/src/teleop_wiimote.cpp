@@ -20,7 +20,7 @@
  *
  */
 
-#include "wiimote/teleop_wiimote.h"
+#include "wiimote/teleop_wiimote.hpp"
 #include "geometry_msgs/Twist.h"
 #include "sensor_msgs/JoyFeedbackArray.h"
 

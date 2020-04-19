@@ -42,7 +42,7 @@
  *
  */
 
-#include "wiimote/wiimote_controller.h"
+#include "wiimote/wiimote_controller.hpp"
 
 #include "sensor_msgs/Joy.h"
 #include "std_msgs/Bool.h"
