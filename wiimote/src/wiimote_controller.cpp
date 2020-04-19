@@ -46,23 +46,20 @@
 
 #include "sensor_msgs/Imu.h"
 #include "sensor_msgs/Joy.h"
+#include "sensor_msgs/JoyFeedbackArray.h"
 #include "std_msgs/Bool.h"
 
 #include "wiimote_msgs/State.h"
 #include "wiimote_msgs/IrSourceInfo.h"
 
+#include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 
-#include <signal.h>
-
-#include <time.h>
-#include <math.h>
-
-#include <vector>
+#include <algorithm>
 #include <string>
+#include <vector>
 
 namespace
 {
@@ -166,6 +163,7 @@ char *WiimoteNode::getBluetoothAddr()
 {
   return batostr(&bt_device_addr_);
 }
+
 void WiimoteNode::setBluetoothAddr(const char *bt_str)
 {
   str2ba(bt_str, &bt_device_addr_);
@@ -177,9 +175,13 @@ bool WiimoteNode::pairWiimote(int flags = 0, int timeout = 5)
 
   ROS_INFO("Put Wiimote in discoverable mode now (press 1+2)...");
   if (timeout == -1)
+  {
     ROS_INFO("Searching indefinitely...");
+  }
   else
+  {
     ROS_INFO("Timeout in about %d seconds if not paired.", timeout);
+  }
 
   if (!(wiimote_ = wiimote_c::cwiid_open_timeout(&bt_device_addr_, flags, timeout)))
   {
@@ -725,13 +727,11 @@ void WiimoteNode::publish()
     return;
   }
 
-
   if (!getStateSample())
   {
     // If we can not get State from the Wiimote, there isn't anything to publish
     return;
   }
-
 
   if (joy_subscribers)
   {
@@ -981,14 +981,17 @@ bool WiimoteNode::isCollectingWiimote()
   return wiimote_state_.rpt_mode &
     (CWIID_RPT_BTN | CWIID_RPT_ACC | CWIID_RPT_IR);
 }
+
 bool WiimoteNode::isCollectingNunchuk()
 {
   return wiimote_state_.rpt_mode & CWIID_RPT_NUNCHUK;
 }
+
 bool WiimoteNode::isCollectingClassic()
 {
   return wiimote_state_.rpt_mode & CWIID_RPT_CLASSIC;
 }
+
 bool WiimoteNode::isCollectingMotionplus()
 {
   return wiimote_state_.rpt_mode & CWIID_RPT_MOTIONPLUS;
@@ -998,10 +1001,12 @@ bool WiimoteNode::isPresentNunchuk()
 {
   return wiimote_state_.ext_type == wiimote_c::CWIID_EXT_NUNCHUK;
 }
+
 bool WiimoteNode::isPresentClassic()
 {
   return wiimote_state_.ext_type == wiimote_c::CWIID_EXT_CLASSIC;
 }
+
 bool WiimoteNode::isPresentMotionplus()
 {
   return wiimote_state_.ext_type == wiimote_c::CWIID_EXT_MOTIONPLUS;
@@ -1622,10 +1627,13 @@ int main(int argc, char *argv[])
   ros::param::param<double>("~check_connection_interval", check_connection_interval, 0.0);
 
   if (fed_addr)
+  {
     ROS_INFO("* * * Pairing with %s", g_wiimote_node->getBluetoothAddr());
-
+  }
   else
+  {
     ROS_INFO("Searching for Wiimotes");
+  }
 
   ROS_INFO("Allow all joy sticks to remain at center position until calibrated.");
 
