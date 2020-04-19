@@ -30,6 +30,7 @@
   <build_depend>roslint</build_depend>
 
   <depend>geometry_msgs</depend>
+  <depend>libbluetooth-dev</depend>
   <depend>python-cwiid</depend>
   <depend>python-numpy</depend>
   <depend>roscpp</depend>
