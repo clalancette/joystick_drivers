@@ -83,10 +83,11 @@ void cwiidErrorCallback(wiimote_c::cwiid_wiimote_t *wiimote, const char *fmt, va
   }
 }
 
+float zeroedByCal(uint8_t raw, uint8_t zero, uint8_t one)
+{
+  return ((raw - zero) * 1.0) / ((one - zero) * 1.0);
 }
-
-#define zeroedByCal(raw, zero, one) \
-  (((raw - zero) * 1.0) / ((one - zero) * 1.0))
+}
 
 WiimoteNode::WiimoteNode()
 {
