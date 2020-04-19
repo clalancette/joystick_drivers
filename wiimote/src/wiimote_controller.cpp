@@ -64,6 +64,27 @@
 #include <vector>
 #include <string>
 
+namespace
+{
+void cwiidErrorCallback(wiimote_c::cwiid_wiimote_t *wiimote, const char *fmt, va_list ap)
+{
+  const int MAX_BUF = 500;
+  char msgs_buf[MAX_BUF];
+
+  vsnprintf(msgs_buf, MAX_BUF, fmt, ap);
+
+  if (wiimote)
+  {
+    ROS_ERROR("Wii Error: ID: %d: %s", wiimote_c::cwiid_get_id(wiimote), msgs_buf);
+  }
+  else
+  {
+    ROS_ERROR("Wii Error: ID: ?: %s", msgs_buf);
+  }
+}
+
+}
+
 WiimoteNode::WiimoteNode()
 {
   joy_pub_ = nh_.advertise<sensor_msgs::Joy>("/joy", 1);
@@ -948,23 +969,6 @@ void WiimoteNode::setRumbleState(uint8_t rumble)
   if (wiimote_c::cwiid_set_rumble(wiimote_, rumble))
   {
     ROS_ERROR("Error setting rumble");
-  }
-}
-
-void WiimoteNode::cwiidErrorCallback(wiimote_c::cwiid_wiimote_t *wiimote, const char *fmt, va_list ap)
-{
-  const int MAX_BUF = 500;
-  char msgs_buf[MAX_BUF];
-
-  vsnprintf(msgs_buf, MAX_BUF, fmt, ap);
-
-  if (wiimote)
-  {
-    ROS_ERROR("Wii Error: ID: %d: %s", wiimote_c::cwiid_get_id(wiimote), msgs_buf);
-  }
-  else
-  {
-    ROS_ERROR("Wii Error: ID: ?: %s", msgs_buf);
   }
 }
 

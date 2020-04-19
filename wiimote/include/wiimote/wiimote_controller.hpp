@@ -79,8 +79,6 @@ private:
 
   ros::NodeHandle nh_;
 
-  static wiimote_c::cwiid_err_t cwiidErrorCallback;
-
 /**
   Node [/wiimote_controller]
   Publications:
