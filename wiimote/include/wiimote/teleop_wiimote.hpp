@@ -20,9 +20,8 @@
  *
  */
 
-#pragma once
-#ifndef WIIMOTE_TELEOP_WIIMOTE_H
-#define WIIMOTE_TELEOP_WIIMOTE_H
+#ifndef WIIMOTE_TELEOP_WIIMOTE_HPP
+#define WIIMOTE_TELEOP_WIIMOTE_HPP
 
 #include "ros/ros.h"
 #include "sensor_msgs/Joy.h"
@@ -39,7 +38,7 @@
 #define DEFAULT_PERCENT_LINEAR_THROTTLE 0.75
 #define DEFAULT_PERCENT_ANGULAR_THROTTLE 0.75
 
-class TeleopWiimote
+class TeleopWiimote final
 {
 public:
   TeleopWiimote();
@@ -67,4 +66,4 @@ private:
   bool njoy_in_use_ = false;
 };
 
-#endif  // WIIMOTE_TELEOP_WIIMOTE_H
+#endif  // WIIMOTE_TELEOP_WIIMOTE_HPP

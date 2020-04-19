@@ -21,25 +21,21 @@
  *
  */
 
-#pragma once
-#ifndef WIIMOTE_STAT_VECTOR_3D_H
-#define WIIMOTE_STAT_VECTOR_3D_H
+#ifndef WIIMOTE_STAT_VECTOR_3D_HPP
+#define WIIMOTE_STAT_VECTOR_3D_HPP
 
 #include <vector>
-#include <numeric>
-#include <algorithm>
-#include <math.h>
 
 // The vector of 3 values collected to generate:
 // mean, standard deviation, and variance.
 
 typedef std::vector<double> TVectorDouble;
 
-class StatVector3d
+class StatVector3d final
 {
 public:
   StatVector3d();
-  StatVector3d(int x, int y, int z);
+  explicit StatVector3d(int x, int y, int z);
 
   void clear();
 
@@ -60,4 +56,4 @@ private:
   std::vector<int> z_;
 };
 
-#endif  // WIIMOTE_STAT_VECTOR_3D_H
+#endif  // WIIMOTE_STAT_VECTOR_3D_HPP

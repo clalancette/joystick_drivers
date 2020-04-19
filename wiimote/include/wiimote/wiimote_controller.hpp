@@ -34,14 +34,12 @@
  *
  */
 
-#pragma once
-#ifndef WIIMOTE_WIIMOTE_CONTROLLER_H
-#define WIIMOTE_WIIMOTE_CONTROLLER_H
+#ifndef WIIMOTE_WIIMOTE_CONTROLLER_HPP
+#define WIIMOTE_WIIMOTE_CONTROLLER_HPP
 
 #include "ros/ros.h"
 #include "sensor_msgs/JoyFeedbackArray.h"
 #include "std_srvs/Empty.h"
-#include "sensor_msgs/Imu.h"
 
 #include "wiimote/stat_vector_3d.hpp"
 
@@ -55,7 +53,7 @@ namespace wiimote_c
 #define zeroedByCal(raw, zero, one) \
   (((raw - zero) * 1.0) / ((one - zero) * 1.0))
 
-class WiimoteNode
+class WiimoteNode final
 {
 public:
   WiimoteNode();
@@ -230,4 +228,4 @@ private:
   const double GYRO_SCALE_FACTOR_ = 0.001055997;
 };
 
-#endif  // WIIMOTE_WIIMOTE_CONTROLLER_H
+#endif  // WIIMOTE_WIIMOTE_CONTROLLER_HPP

@@ -44,6 +44,7 @@
 
 #include "wiimote/wiimote_controller.hpp"
 
+#include "sensor_msgs/Imu.h"
 #include "sensor_msgs/Joy.h"
 #include "std_msgs/Bool.h"
 
