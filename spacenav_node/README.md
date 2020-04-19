@@ -1,18 +1,18 @@
 # Spacenav Nodes #
 ## spacenav_node
 ##### Published topics
-* `spacenav/offset` (geometry_msgs/Vector3) 
-   
-   Publishes the linear component of the joystick's position. Approximately normalized to a range of -1 to 1. 
+* `spacenav/offset` (geometry_msgs/Vector3)
+
+   Publishes the linear component of the joystick's position. Approximately normalized to a range of -1 to 1.
 * `spacenav/rot_offset`(geometry_msgs/Vector3)
 
-   Publishes the angular component of the joystick's position. Approximately normalized to a range of -1 to 1. 
+   Publishes the angular component of the joystick's position. Approximately normalized to a range of -1 to 1.
 * `spacenav/twist` (geometry_msgs/Twist)
 
-   Combines offset and rot_offset into a single message. 
+   Combines offset and rot_offset into a single message.
 * `spacenav/joy` (sensor_msgs/Joy)
-   
-   Outputs the spacenav's six degrees of freedom and its buttons as a joystick message. 
+
+   Outputs the spacenav's six degrees of freedom and its buttons as a joystick message.
 ##### Parameters
 * `zero_when_static`
 
@@ -26,17 +26,17 @@
 
    sets the translational deadband
 * `static_rot_deadband`
-   
+
    sets the rotational deadband
 * `linear_scale`
-   
+
    sets the scale of the linear output
-   
+
    takes a vector (x, y, z)
 * `angular_scale`
-   
+
    sets the scale of the angular output
-   
+
    takes a vector (x, y, z)
 
 The `linear_scale` and `angular_scale` parameters take vector arguements.
@@ -62,4 +62,3 @@ Viewing the output from the spacenav can be done as follows:
 ```
 $ rostopic echo /spacenav/joy
 ```
-
