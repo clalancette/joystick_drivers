@@ -143,8 +143,7 @@ private:
   struct wiimote_c::cwiid_state wiimote_state_;
   void initializeWiimoteState();
   // Time last state sample was taken
-  uint32_t state_secs_;
-  uint32_t state_nsecs_;
+  ros::Time state_time_;
 
   // Which data items should be reported in state
   uint8_t report_mode_;

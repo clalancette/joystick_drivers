@@ -110,9 +110,6 @@ WiimoteNode::WiimoteNode()
 
   initializeWiimoteState();
 
-  state_secs_ = 0;
-  state_nsecs_ = 0;
-
   // Setup the Wii Error Handler
   wiimote_c::cwiid_set_err(cwiidErrorCallback);
 
@@ -212,6 +209,7 @@ bool WiimoteNode::pairWiimote(int flags = 0, int timeout = 5)
 
   return status;
 }
+
 int WiimoteNode::unpairWiimote()
 {
   return wiimote_c::cwiid_close(wiimote_);
@@ -476,16 +474,7 @@ void WiimoteNode::checkFactoryCalibrationData()
     }
     else
     {
-      struct timespec state_tv;
-
-      if (clock_gettime(CLOCK_REALTIME, &state_tv) == 0)
-      {
-        calibration_time_ = ros::Time::now();
-      }
-      else
-      {
-        ROS_WARN("Could not update calibration time.");
-      }
+      calibration_time_ = ros::Time::now();
     }
 
     // Restore the pre-existing reporting mode
@@ -882,18 +871,7 @@ bool WiimoteNode::getStateSample()
 
   if (get_state_result)
   {
-    struct timespec state_tv;
-
-    if (clock_gettime(CLOCK_REALTIME, &state_tv) == 0)
-    {
-      state_secs_ = state_tv.tv_sec;
-      state_nsecs_ = state_tv.tv_nsec;
-    }
-    else
-    {
-      ROS_ERROR("Error sampling real-time clock");
-      result = false;
-    }
+    state_time_ = ros::Time::now();
   }
   else
   {
@@ -1150,8 +1128,7 @@ void WiimoteNode::publishJoy()
 {
   sensor_msgs::Joy joy_data;
 
-  joy_data.header.stamp.sec = state_secs_;
-  joy_data.header.stamp.nsec = state_nsecs_;
+  joy_data.header.stamp = state_time_;
 
   joy_data.axes.push_back(zeroedByCal(wiimote_state_.acc[CWIID_X],
         wiimote_cal_.zero[CWIID_X], wiimote_cal_.one[CWIID_X]) * EARTH_GRAVITY_);
@@ -1184,8 +1161,7 @@ void WiimoteNode::publishImuData()
 
   sensor_msgs::Imu imu_data_data;
 
-  imu_data_data.header.stamp.sec = state_secs_;
-  imu_data_data.header.stamp.nsec = state_nsecs_;
+  imu_data_data.header.stamp = state_time_;
 
   // Publish that Orientation data is invalid
   // [ -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ]
@@ -1221,8 +1197,7 @@ void WiimoteNode::publishWiimoteState()
 {
   wiimote_msgs::State wiimote_state_data;
 
-  wiimote_state_data.header.stamp.sec = state_secs_;
-  wiimote_state_data.header.stamp.nsec = state_nsecs_;
+  wiimote_state_data.header.stamp = state_time_;
 
   // Wiimote data
   wiimote_state_data.linear_acceleration_zeroed.x = zeroedByCal(wiimote_state_.acc[CWIID_X],
@@ -1413,8 +1388,7 @@ void WiimoteNode::publishWiimoteNunchuk()
 
   if (publishWiimoteNunchukCommon())
   {
-    wiimote_nunchuk_data.header.stamp.sec = state_secs_;
-    wiimote_nunchuk_data.header.stamp.nsec = state_nsecs_;
+    wiimote_nunchuk_data.header.stamp = state_time_;
 
     // Joy stick
     double stick[2];
@@ -1479,8 +1453,7 @@ void WiimoteNode::publishWiimoteClassic()
   updateJoystickMinMax(wiimote_state_.ext.classic.r_stick, classic_stick_right_min_,
       classic_stick_right_max_, "Classic Right");
 
-  wiimote_classic_data.header.stamp.sec = state_secs_;
-  wiimote_classic_data.header.stamp.nsec = state_nsecs_;
+  wiimote_classic_data.header.stamp = state_time_;
 
   // Joy stick
   double stick_left[2];
