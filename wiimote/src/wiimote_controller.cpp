@@ -1562,13 +1562,6 @@ int main(int argc, char *argv[])
   WiimoteNode *wiimote_node;
 
   wiimote_node = new WiimoteNode();
-  // Do we have a bluetooth address passed in?
-  if (argc > 1)
-  {
-    ROS_INFO("Using Bluetooth address specified from CLI");
-    wiimote_node->setBluetoothAddr(argv[1]);
-    fed_addr = true;
-  }
 
   if (ros::param::get("~bluetooth_addr", bluetooth_addr))
   {
