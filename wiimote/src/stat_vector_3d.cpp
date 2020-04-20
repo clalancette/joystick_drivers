@@ -50,7 +50,7 @@ void StatVector3d::clear()
   count_ = 0;
 }
 
-int StatVector3d::size()
+size_t StatVector3d::size()
 {
   return count_;
 }

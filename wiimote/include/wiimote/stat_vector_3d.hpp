@@ -39,7 +39,7 @@ public:
 
   void clear();
 
-  int size();
+  size_t size();
   void addData(int x, int y, int z);
 
   TVectorDouble getMeanRaw();
@@ -50,7 +50,7 @@ public:
   TVectorDouble getStandardDeviationScaled(double scale);
 
 private:
-  int count_;
+  size_t count_;
   std::vector<int> x_;
   std::vector<int> y_;
   std::vector<int> z_;

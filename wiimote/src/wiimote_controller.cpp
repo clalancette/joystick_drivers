@@ -322,8 +322,8 @@ void WiimoteNode::checkFactoryCalibrationData()
 
     bool failed = false;
     bool data_complete = false;
-    int wiimote_data_points = 0;
-    int motionplus_data_points = 0;
+    size_t wiimote_data_points = 0;
+    size_t motionplus_data_points = 0;
 
     while (!failed && !data_complete)
     {
