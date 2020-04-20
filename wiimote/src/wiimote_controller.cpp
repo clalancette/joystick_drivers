@@ -52,7 +52,6 @@
 #include "wiimote_msgs/State.h"
 #include "wiimote_msgs/IrSourceInfo.h"
 
-#include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -1579,45 +1578,26 @@ bool WiimoteNode::serviceImuCalibrateCallback(std_srvs::Empty::Request&, std_srv
   return true;
 }
 
-WiimoteNode *g_wiimote_node;
-
-// int sig The signal number is unused
-void mySigHandler(int sig)
-{
-  // Do some custom action.
-  // For example, publish a stop message to some other nodes.
-
-  // Clear the lights and rumble
-  if (nullptr != g_wiimote_node)
-  {
-    g_wiimote_node->setRumbleState(0);
-    g_wiimote_node->setLedState(0);
-  }
-
-  // All the default sigint handler does is call shutdown()
-  ros::shutdown();
-
-  exit(0);
-}
-
 int main(int argc, char *argv[])
 {
   bool fed_addr = false;
   std::string bluetooth_addr;
   ros::init(argc, argv, "wiimote_controller");
 
-  g_wiimote_node = new WiimoteNode();
+  WiimoteNode *wiimote_node;
+
+  wiimote_node = new WiimoteNode();
   // Do we have a bluetooth address passed in?
   if (argc > 1)
   {
     ROS_INFO("Using Bluetooth address specified from CLI");
-    g_wiimote_node->setBluetoothAddr(argv[1]);
+    wiimote_node->setBluetoothAddr(argv[1]);
     fed_addr = true;
   }
 
   if (ros::param::get("~bluetooth_addr", bluetooth_addr))
   {
-    g_wiimote_node->setBluetoothAddr(bluetooth_addr.c_str());
+    wiimote_node->setBluetoothAddr(bluetooth_addr.c_str());
     fed_addr = true;
   }
 
@@ -1628,7 +1608,7 @@ int main(int argc, char *argv[])
 
   if (fed_addr)
   {
-    ROS_INFO("* * * Pairing with %s", g_wiimote_node->getBluetoothAddr());
+    ROS_INFO("* * * Pairing with %s", wiimote_node->getBluetoothAddr());
   }
   else
   {
@@ -1637,12 +1617,9 @@ int main(int argc, char *argv[])
 
   ROS_INFO("Allow all joy sticks to remain at center position until calibrated.");
 
-  if (g_wiimote_node->pairWiimote(0, pair_timeout))
+  if (wiimote_node->pairWiimote(0, pair_timeout))
   {
     ROS_INFO("Wiimote is Paired");
-
-    signal(SIGINT, mySigHandler);
-    signal(SIGTERM, mySigHandler);
   }
   else
   {
@@ -1655,24 +1632,30 @@ int main(int argc, char *argv[])
   if (check_connection_interval > 0.0)
   {
     timer = nh.createTimer(ros::Duration(check_connection_interval),
-                           boost::bind(&WiimoteNode::checkConnection, g_wiimote_node));
+                           boost::bind(&WiimoteNode::checkConnection, wiimote_node));
   }
 
   ros::Rate loop_rate(10);  // 10Hz
   while (ros::ok())
   {
-    g_wiimote_node->publish();
+    wiimote_node->publish();
 
     ros::spinOnce();
 
     loop_rate.sleep();
   }
 
-  if (g_wiimote_node->unpairWiimote())
+  wiimote_node->setRumbleState(0);
+  wiimote_node->setLedState(0);
+
+  if (wiimote_node->unpairWiimote())
   {
     ROS_ERROR("Error on wiimote disconnect");
-    return 1;
   }
+
+  delete wiimote_node;
+
+  ros::shutdown();
 
   return 0;
 }
