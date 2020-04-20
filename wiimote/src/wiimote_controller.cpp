@@ -1647,7 +1647,7 @@ int main(int argc, char *argv[])
   else
   {
     ROS_ERROR("* * * Wiimote pairing failed.");
-    return -2;
+    return 2;
   }
 
   ros::NodeHandle nh;
@@ -1671,7 +1671,7 @@ int main(int argc, char *argv[])
   if (g_wiimote_node->unpairWiimote())
   {
     ROS_ERROR("Error on wiimote disconnect");
-    return -1;
+    return 1;
   }
 
   return 0;
