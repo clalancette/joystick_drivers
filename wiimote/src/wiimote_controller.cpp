@@ -780,8 +780,6 @@ bool WiimoteNode::getStateSample()
 
   int count = 0;
   int big_count = 0;
-  static int wiimote_count = 0;
-  static int motionplus_count = 0;
 
   do
   {
@@ -809,10 +807,10 @@ bool WiimoteNode::getStateSample()
     }
     else
     {
-      if (wiimote_count < IGNORE_DATA_POINTS_)
+      if (wiimote_count_ < IGNORE_DATA_POINTS_)
       {
-        // ROS_DEBUG("Ignoring Wiimote data point %d", wiimote_count);
-        wiimote_count++;
+        // ROS_DEBUG("Ignoring Wiimote data point %d", wiimote_count_);
+        wiimote_count_++;
       }
       else
       {
@@ -859,10 +857,10 @@ bool WiimoteNode::getStateSample()
       }
       else
       {
-        if (motionplus_count < IGNORE_DATA_POINTS_)
+        if (motionplus_count_ < IGNORE_DATA_POINTS_)
         {
-          ROS_DEBUG("Ignoring MotionPlus data point %d", motionplus_count);
-          motionplus_count++;
+          ROS_DEBUG("Ignoring MotionPlus data point %zu", motionplus_count_);
+          motionplus_count_++;
           usleep(1000);  // wait a thousandth of a second
         }
         else
@@ -878,7 +876,7 @@ bool WiimoteNode::getStateSample()
   else
   {
     // MotionPlus was removed, so reset the master count
-    motionplus_count = 0;
+    motionplus_count_ = 0;
     resetMotionPlusState();
   }
 

@@ -184,8 +184,10 @@ private:
   uint8_t classic_stick_right_max_[2];
   uint8_t classic_stick_right_min_[2];
 
-  const int IGNORE_DATA_POINTS_ = 100;  // throw away the first few data points
+  const size_t IGNORE_DATA_POINTS_ = 100;  // throw away the first few data points
   const size_t COVARIANCE_DATA_POINTS_ = 100;
+  size_t wiimote_count_{0};
+  size_t motionplus_count_{0};
   StatVector3d linear_acceleration_stat_;
   StatVector3d angular_velocity_stat_;
   boost::array<double, 9> linear_acceleration_covariance_;
