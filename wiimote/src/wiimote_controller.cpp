@@ -132,7 +132,6 @@ WiimoteNode::~WiimoteNode()
   {
     ROS_ERROR("Error on wiimote disconnect");
   }
-
 }
 
 void WiimoteNode::initializeWiimoteState()
@@ -153,10 +152,14 @@ void WiimoteNode::initializeWiimoteState()
   wiimote_state_.ir_src[1].valid = 0;
   wiimote_state_.ir_src[2].valid = 0;
   wiimote_state_.ir_src[3].valid = 0;
-  wiimote_state_.ir_src[0].pos[0] = 0; wiimote_state_.ir_src[0].pos[1] = 0;
-  wiimote_state_.ir_src[1].pos[0] = 0; wiimote_state_.ir_src[1].pos[1] = 0;
-  wiimote_state_.ir_src[2].pos[0] = 0; wiimote_state_.ir_src[2].pos[1] = 0;
-  wiimote_state_.ir_src[3].pos[0] = 0; wiimote_state_.ir_src[3].pos[1] = 0;
+  wiimote_state_.ir_src[0].pos[0] = 0;
+  wiimote_state_.ir_src[0].pos[1] = 0;
+  wiimote_state_.ir_src[1].pos[0] = 0;
+  wiimote_state_.ir_src[1].pos[1] = 0;
+  wiimote_state_.ir_src[2].pos[0] = 0;
+  wiimote_state_.ir_src[2].pos[1] = 0;
+  wiimote_state_.ir_src[3].pos[0] = 0;
+  wiimote_state_.ir_src[3].pos[1] = 0;
   wiimote_state_.ir_src[0].size = 0;
   wiimote_state_.ir_src[1].size = 0;
   wiimote_state_.ir_src[2].size = 0;
@@ -173,7 +176,7 @@ void WiimoteNode::setBluetoothAddr(const char *bt_str)
   str2ba(bt_str, &bt_device_addr_);
 }
 
-bool WiimoteNode::pairWiimote(int flags = 0, int timeout = 5)
+bool WiimoteNode::pairWiimote(int flags, int timeout)
 {
   bool status = true;
 
@@ -190,21 +193,19 @@ bool WiimoteNode::pairWiimote(int flags = 0, int timeout = 5)
   if (!(wiimote_ = wiimote_c::cwiid_open_timeout(&bt_device_addr_, flags, timeout)))
   {
     ROS_ERROR("Unable to connect to wiimote");
-    status = false;
+    return false;
   }
-  else
+
+  // Give the hardware time to zero the accelerometer and gyro after pairing
+  // Ensure we are getting valid data before using
+  sleep(1);
+
+  checkFactoryCalibrationData();
+
+  if (!wiimote_calibrated_)
   {
-    // Give the hardware time to zero the accelerometer and gyro after pairing
-    // Ensure we are getting valid data before using
-    sleep(1);
-
-    checkFactoryCalibrationData();
-
-    if (!wiimote_calibrated_)
-    {
-      ROS_ERROR("Wiimote not usable due to calibration failure.");
-      status = false;
-    }
+    ROS_ERROR("Wiimote not usable due to calibration failure.");
+    status = false;
   }
 
   return status;
@@ -888,17 +889,16 @@ void WiimoteNode::setReportMode(uint8_t rpt_mode)
   if (wiimote_c::cwiid_set_rpt_mode(wiimote_, rpt_mode))
   {
     ROS_ERROR("Error setting report mode: Bit(s):%d", rpt_mode);
+    return;
   }
-  else
-  {
-    wiimote_state_.rpt_mode = rpt_mode;
 
-    // Enable the MotionPlus
-    if (rpt_mode & CWIID_RPT_MOTIONPLUS)
-    {
-      wiimote_c::cwiid_enable(wiimote_, CWIID_FLAG_MOTIONPLUS);
-      ROS_DEBUG("Enabled MotionPlus");
-    }
+  wiimote_state_.rpt_mode = rpt_mode;
+
+  // Enable the MotionPlus
+  if (rpt_mode & CWIID_RPT_MOTIONPLUS)
+  {
+    wiimote_c::cwiid_enable(wiimote_, CWIID_FLAG_MOTIONPLUS);
+    ROS_DEBUG("Enabled MotionPlus");
   }
 }
 
@@ -947,7 +947,6 @@ void WiimoteNode::checkConnection()
   if (wiimote_c::cwiid_set_led(wiimote_, led_state_))
   {
     ROS_INFO("Connection to wiimote lost");
-    ros::shutdown();
   }
 }
 
@@ -1245,42 +1244,39 @@ void WiimoteNode::publishWiimoteState()
   wiimote_state_data.buttons.elems[10] = ((wiimote_state_.buttons & CWIID_BTN_HOME) > 0);
 
   // Nunchuk data
-  if (isPresentNunchuk())
+  if (isPresentNunchuk() && publishWiimoteNunchukCommon())
   {
-    if (publishWiimoteNunchukCommon())
-    {
-      // Joy stick
-      double stick[2];
+    // Joy stick
+    double stick[2];
 
-      calculateJoystickAxisXY(wiimote_state_.ext.nunchuk.stick, nunchuk_stick_min_,
-          nunchuk_stick_max_, nunchuk_stick_center_, stick);
+    calculateJoystickAxisXY(wiimote_state_.ext.nunchuk.stick, nunchuk_stick_min_,
+        nunchuk_stick_max_, nunchuk_stick_center_, stick);
 
-      wiimote_state_data.nunchuk_joystick_raw[CWIID_X] = wiimote_state_.ext.nunchuk.stick[CWIID_X];
-      wiimote_state_data.nunchuk_joystick_raw[CWIID_Y] = wiimote_state_.ext.nunchuk.stick[CWIID_Y];
+    wiimote_state_data.nunchuk_joystick_raw[CWIID_X] = wiimote_state_.ext.nunchuk.stick[CWIID_X];
+    wiimote_state_data.nunchuk_joystick_raw[CWIID_Y] = wiimote_state_.ext.nunchuk.stick[CWIID_Y];
 
-      wiimote_state_data.nunchuk_joystick_zeroed[CWIID_X] = stick[CWIID_X];
-      wiimote_state_data.nunchuk_joystick_zeroed[CWIID_Y] = stick[CWIID_Y];
+    wiimote_state_data.nunchuk_joystick_zeroed[CWIID_X] = stick[CWIID_X];
+    wiimote_state_data.nunchuk_joystick_zeroed[CWIID_Y] = stick[CWIID_Y];
 
-      wiimote_state_data.nunchuk_acceleration_raw.x = wiimote_state_.ext.nunchuk.acc[CWIID_X];
-      wiimote_state_data.nunchuk_acceleration_raw.y = wiimote_state_.ext.nunchuk.acc[CWIID_Y];
-      wiimote_state_data.nunchuk_acceleration_raw.z = wiimote_state_.ext.nunchuk.acc[CWIID_Z];
+    wiimote_state_data.nunchuk_acceleration_raw.x = wiimote_state_.ext.nunchuk.acc[CWIID_X];
+    wiimote_state_data.nunchuk_acceleration_raw.y = wiimote_state_.ext.nunchuk.acc[CWIID_Y];
+    wiimote_state_data.nunchuk_acceleration_raw.z = wiimote_state_.ext.nunchuk.acc[CWIID_Z];
 
-      wiimote_state_data.nunchuk_acceleration_zeroed.x =
-        zeroedByCal(wiimote_state_.ext.nunchuk.acc[CWIID_X],
-            nunchuk_cal_.zero[CWIID_X], nunchuk_cal_.one[CWIID_X]) * EARTH_GRAVITY_;
-      wiimote_state_data.nunchuk_acceleration_zeroed.y =
-        zeroedByCal(wiimote_state_.ext.nunchuk.acc[CWIID_Y],
-            nunchuk_cal_.zero[CWIID_Y], nunchuk_cal_.one[CWIID_Y]) * EARTH_GRAVITY_;
-      wiimote_state_data.nunchuk_acceleration_zeroed.z =
-        zeroedByCal(wiimote_state_.ext.nunchuk.acc[CWIID_Z],
-            nunchuk_cal_.zero[CWIID_Z], nunchuk_cal_.one[CWIID_Z]) * EARTH_GRAVITY_;
+    wiimote_state_data.nunchuk_acceleration_zeroed.x =
+      zeroedByCal(wiimote_state_.ext.nunchuk.acc[CWIID_X],
+          nunchuk_cal_.zero[CWIID_X], nunchuk_cal_.one[CWIID_X]) * EARTH_GRAVITY_;
+    wiimote_state_data.nunchuk_acceleration_zeroed.y =
+      zeroedByCal(wiimote_state_.ext.nunchuk.acc[CWIID_Y],
+          nunchuk_cal_.zero[CWIID_Y], nunchuk_cal_.one[CWIID_Y]) * EARTH_GRAVITY_;
+    wiimote_state_data.nunchuk_acceleration_zeroed.z =
+      zeroedByCal(wiimote_state_.ext.nunchuk.acc[CWIID_Z],
+          nunchuk_cal_.zero[CWIID_Z], nunchuk_cal_.one[CWIID_Z]) * EARTH_GRAVITY_;
 
-      // Keep consistency with existing Python Node
-      wiimote_state_data.nunchuk_buttons[0] =
-        ((wiimote_state_.ext.nunchuk.buttons & CWIID_NUNCHUK_BTN_Z) > 0);
-      wiimote_state_data.nunchuk_buttons[1] =
-        ((wiimote_state_.ext.nunchuk.buttons & CWIID_NUNCHUK_BTN_C) > 0);
-    }
+    // Keep consistency with existing Python Node
+    wiimote_state_data.nunchuk_buttons[0] =
+      ((wiimote_state_.ext.nunchuk.buttons & CWIID_NUNCHUK_BTN_Z) > 0);
+    wiimote_state_data.nunchuk_buttons[1] =
+      ((wiimote_state_.ext.nunchuk.buttons & CWIID_NUNCHUK_BTN_C) > 0);
   }
 
   // IR Tracking Data
