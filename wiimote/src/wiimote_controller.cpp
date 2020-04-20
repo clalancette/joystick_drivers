@@ -128,6 +128,14 @@ WiimoteNode::WiimoteNode()
 
 WiimoteNode::~WiimoteNode()
 {
+  setRumbleState(0);
+  setLedState(0);
+
+  if (unpairWiimote())
+  {
+    ROS_ERROR("Error on wiimote disconnect");
+  }
+
 }
 
 void WiimoteNode::initializeWiimoteState()
@@ -1643,14 +1651,6 @@ int main(int argc, char *argv[])
     ros::spinOnce();
 
     loop_rate.sleep();
-  }
-
-  wiimote_node->setRumbleState(0);
-  wiimote_node->setLedState(0);
-
-  if (wiimote_node->unpairWiimote())
-  {
-    ROS_ERROR("Error on wiimote disconnect");
   }
 
   delete wiimote_node;

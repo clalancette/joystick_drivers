@@ -58,16 +58,16 @@ public:
   char *getBluetoothAddr();
   void setBluetoothAddr(const char *bt_str);
   bool pairWiimote(int flags, int timeout);
-  int unpairWiimote();
 
   void publish();
   void checkConnection();
   void timerCallback(const ros::TimerEvent&);
 
+private:
+  int unpairWiimote();
   void setLedState(uint8_t led_state);
   void setRumbleState(uint8_t rumble);
 
-private:
   void setReportMode(uint8_t rpt_mode);
   void checkFactoryCalibrationData();
   void resetMotionPlusState();
