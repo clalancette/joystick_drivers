@@ -60,6 +60,9 @@
 #include <string>
 #include <vector>
 
+namespace wiimote
+{
+
 namespace
 {
 void cwiidErrorCallback(wiimote_c::cwiid_wiimote_t *wiimote, const char *fmt, va_list ap)
@@ -1589,13 +1592,15 @@ bool WiimoteNode::serviceImuCalibrateCallback(std_srvs::Empty::Request&, std_srv
   return true;
 }
 
+}  // namespace wiimote
+
 int main(int argc, char *argv[])
 {
   ros::init(argc, argv, "wiimote_controller");
   ros::NodeHandle node;
   ros::NodeHandle private_nh("~");
 
-  WiimoteNode wiimote_node(node, private_nh);
+  wiimote::WiimoteNode wiimote_node(node, private_nh);
 
   ros::Rate loop_rate(10);  // 10Hz
   while (ros::ok())

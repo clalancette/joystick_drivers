@@ -43,6 +43,9 @@
 
 #include "wiimote/stat_vector_3d.hpp"
 
+namespace wiimote
+{
+
 // We need to link against these
 #include <bluetooth/bluetooth.h>  // libbluetooth.so
 namespace wiimote_c
@@ -225,5 +228,7 @@ private:
   // in radians/sec.
   const double GYRO_SCALE_FACTOR_ = 0.001055997;
 };
+
+}  // namespace wiimote
 
 #endif  // WIIMOTE_WIIMOTE_CONTROLLER_HPP
