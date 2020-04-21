@@ -64,7 +64,7 @@ public:
 private:
   char *getBluetoothAddr();
   void setBluetoothAddr(const char *bt_str);
-  bool pairWiimote(int flags, int timeout);
+  bool pairWiimote(int timeout);
 
   void checkConnection(const ros::TimerEvent &event);
   int unpairWiimote();

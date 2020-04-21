@@ -113,7 +113,7 @@ WiimoteNode::WiimoteNode(ros::NodeHandle node, ros::NodeHandle private_nh)
 
   // FIXME: this can block for a while in the constructor, which isn't very nice.
   // Can we hand this off to a thread or timer or something?
-  if (pairWiimote(0, pair_timeout))
+  if (pairWiimote(pair_timeout))
   {
     ROS_INFO("Wiimote is Paired");
   }
@@ -214,7 +214,7 @@ void WiimoteNode::setBluetoothAddr(const char *bt_str)
   str2ba(bt_str, &bt_device_addr_);
 }
 
-bool WiimoteNode::pairWiimote(int flags, int timeout)
+bool WiimoteNode::pairWiimote(int timeout)
 {
   bool status = true;
 
@@ -228,7 +228,7 @@ bool WiimoteNode::pairWiimote(int flags, int timeout)
     ROS_INFO("Timeout in about %d seconds if not paired.", timeout);
   }
 
-  if (!(wiimote_ = wiimote_c::cwiid_open_timeout(&bt_device_addr_, flags, timeout)))
+  if (!(wiimote_ = wiimote_c::cwiid_open_timeout(&bt_device_addr_, 0, timeout)))
   {
     ROS_ERROR("Unable to connect to wiimote");
     return false;
