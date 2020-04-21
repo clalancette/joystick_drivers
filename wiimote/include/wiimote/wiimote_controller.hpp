@@ -195,7 +195,7 @@ private:
   uint8_t led_state_ = 0;
   uint8_t rumble_ = 0;
 
-  uint64_t wiimote_errors = 0;
+  uint64_t wiimote_errors_ = 0;
 
   ros::Timer timer_;
 

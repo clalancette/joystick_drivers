@@ -1361,7 +1361,7 @@ void WiimoteNode::publishWiimoteState()
   // No usage found in original Python code which every set this variable
   // TODO(mdhorn): Use this to report error
   // Is this a count? or a bunch of status that are ORed together?
-  wiimote_state_data.errors = wiimote_errors;
+  wiimote_state_data.errors = wiimote_errors_;
 
   wiimote_state_pub_.publish(wiimote_state_data);
 }
