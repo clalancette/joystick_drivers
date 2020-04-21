@@ -57,7 +57,9 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <chrono>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace wiimote
@@ -110,21 +112,14 @@ WiimoteNode::WiimoteNode(ros::NodeHandle node, ros::NodeHandle private_nh)
 
   ROS_INFO("Allow all joy sticks to remain at center position until calibrated.");
 
-  // FIXME: this can block for a while in the constructor, which isn't very nice.
-  // We have to hand this off to a thread since cwiid can block and sleep while
-  // waiting for the Wiimote to pair.
-  if (pairWiimote(pair_timeout))
-  {
-    ROS_INFO("Wiimote is Paired");
-  }
-  else
-  {
-    ROS_ERROR("* * * Wiimote pairing failed.");
-    throw std::runtime_error("Wiimote pairing failed.");
-  }
+  ROS_INFO("Put Wiimote in discoverable mode now (press 1+2)...");
+
+  // Setup the Wii Error Handler
+  wiimote_c::cwiid_set_err(cwiidErrorCallback);
 
   if (check_connection_interval > 0.0)
   {
+    // FIXME: probably move this into the hardware thread
     timer_ = private_nh.createTimer(ros::Duration(check_connection_interval), &WiimoteNode::checkConnection, this);
   }
 
@@ -148,9 +143,6 @@ WiimoteNode::WiimoteNode(ros::NodeHandle node, ros::NodeHandle private_nh)
 
   initializeWiimoteState();
 
-  // Setup the Wii Error Handler
-  wiimote_c::cwiid_set_err(cwiidErrorCallback);
-
   report_mode_ = 0;
 
   wiimote_calibrated_ = false;
@@ -159,14 +151,85 @@ WiimoteNode::WiimoteNode(ros::NodeHandle node, ros::NodeHandle private_nh)
   resetNunchukState();
   resetClassicState();
   nunchuk_failed_calibration_ = false;
+
+  // Only start the thread once everything else has been configured
+  hardware_thread_ = std::thread(&WiimoteNode::hardwareThread, this);
 }
 
 WiimoteNode::~WiimoteNode()
 {
+  running_ = false;
+  hardware_thread_.join();
+}
+
+void WiimoteNode::hardwareThread()
+{
+  enum class StateMachine
+  {
+   PAIRING,
+   CALIBRATING,
+   RUNNING,
+  };
+
+  StateMachine state{StateMachine::PAIRING};
+  std::chrono::time_point<std::chrono::steady_clock> next = std::chrono::steady_clock::now();
+  std::chrono::time_point<std::chrono::steady_clock> pair_time;
+
+  while (running_) {
+    switch (state) {
+    case StateMachine::PAIRING:
+      if ((wiimote_ = wiimote_c::cwiid_open_timeout(&bt_device_addr_, 0, 2)))
+      {
+        // Paired!  Move to getting calibration
+        pair_time = std::chrono::steady_clock::now();
+        state = StateMachine::CALIBRATING;
+        next = std::chrono::steady_clock::now();
+      }
+      else
+      {
+        next += std::chrono::milliseconds(100);
+      }
+      break;
+    case StateMachine::CALIBRATING:
+      {
+        std::chrono::time_point<std::chrono::steady_clock> now = std::chrono::steady_clock::now();
+        auto time_since_pair_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - pair_time);
+        if (time_since_pair_ms.count() >= 1000)
+        {
+          checkFactoryCalibrationData();
+
+          if (wiimote_calibrated_)
+          {
+            state = StateMachine::RUNNING;
+          }
+          else
+          {
+            ROS_ERROR("Wiimote not usable due to calibration failure; trying to connect again");
+            wiimote_c::cwiid_close(wiimote_);
+            state = StateMachine::PAIRING;
+          }
+          next = std::chrono::steady_clock::now();
+        }
+        else
+        {
+          next += std::chrono::milliseconds(100);
+        }
+      }
+      break;
+    case StateMachine::RUNNING:
+      publish();
+      next += std::chrono::milliseconds(100);
+      break;
+    }
+
+    std::this_thread::sleep_until(next);
+  }
+
+  // Shutdown
   setRumbleState(0);
   setLedState(0);
 
-  if (unpairWiimote())
+  if (wiimote_c::cwiid_close(wiimote_))
   {
     ROS_ERROR("Error on wiimote disconnect");
   }
@@ -212,46 +275,6 @@ char *WiimoteNode::getBluetoothAddr()
 void WiimoteNode::setBluetoothAddr(const char *bt_str)
 {
   str2ba(bt_str, &bt_device_addr_);
-}
-
-bool WiimoteNode::pairWiimote(int timeout)
-{
-  bool status = true;
-
-  ROS_INFO("Put Wiimote in discoverable mode now (press 1+2)...");
-  if (timeout == -1)
-  {
-    ROS_INFO("Searching indefinitely...");
-  }
-  else
-  {
-    ROS_INFO("Timeout in about %d seconds if not paired.", timeout);
-  }
-
-  if (!(wiimote_ = wiimote_c::cwiid_open_timeout(&bt_device_addr_, 0, timeout)))
-  {
-    ROS_ERROR("Unable to connect to wiimote");
-    return false;
-  }
-
-  // Give the hardware time to zero the accelerometer and gyro after pairing
-  // Ensure we are getting valid data before using
-  sleep(1);
-
-  checkFactoryCalibrationData();
-
-  if (!wiimote_calibrated_)
-  {
-    ROS_ERROR("Wiimote not usable due to calibration failure.");
-    status = false;
-  }
-
-  return status;
-}
-
-int WiimoteNode::unpairWiimote()
-{
-  return wiimote_c::cwiid_close(wiimote_);
 }
 
 void WiimoteNode::checkFactoryCalibrationData()
@@ -1602,15 +1625,7 @@ int main(int argc, char *argv[])
 
   wiimote::WiimoteNode wiimote_node(node, private_nh);
 
-  ros::Rate loop_rate(10);  // 10Hz
-  while (ros::ok())
-  {
-    wiimote_node.publish();
-
-    ros::spinOnce();
-
-    loop_rate.sleep();
-  }
+  ros::spin();
 
   ros::shutdown();
 

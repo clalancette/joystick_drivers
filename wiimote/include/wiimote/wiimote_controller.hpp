@@ -37,6 +37,9 @@
 #ifndef WIIMOTE_WIIMOTE_CONTROLLER_HPP
 #define WIIMOTE_WIIMOTE_CONTROLLER_HPP
 
+#include <atomic>
+#include <thread>
+
 #include "ros/ros.h"
 #include "sensor_msgs/JoyFeedbackArray.h"
 #include "std_srvs/Empty.h"
@@ -64,10 +67,8 @@ public:
 private:
   char *getBluetoothAddr();
   void setBluetoothAddr(const char *bt_str);
-  bool pairWiimote(int timeout);
 
   void checkConnection(const ros::TimerEvent &event);
-  int unpairWiimote();
   void setLedState(uint8_t led_state);
   void setRumbleState(uint8_t rumble);
 
@@ -124,6 +125,8 @@ private:
 
   void setLEDBit(uint8_t led, bool on);
   void setRumbleBit(bool on);
+
+  void hardwareThread();
 
   ros::Publisher joy_pub_;
   ros::Publisher imu_data_pub_;
@@ -201,6 +204,9 @@ private:
   uint64_t wiimote_errors_ = 0;
 
   ros::Timer timer_;
+
+  std::thread hardware_thread_;
+  std::atomic<bool> running_{true};
 
   // Convert wiimote accelerator readings from g's to m/sec^2:
   const double EARTH_GRAVITY_ = 9.80665;  // m/sec^2 @sea_level
