@@ -90,13 +90,12 @@ float zeroedByCal(uint8_t raw, uint8_t zero, uint8_t one)
 
 WiimoteNode::WiimoteNode(ros::NodeHandle node, ros::NodeHandle private_nh)
 {
-  std::string bluetooth_addr;
-
   int pair_timeout;
   double check_connection_interval;
   private_nh.param("pair_timeout", pair_timeout, 5);
   private_nh.param("check_connection_interval", check_connection_interval, 0.0);
 
+  std::string bluetooth_addr;
   if (private_nh.getParam("bluetooth_addr", bluetooth_addr))
   {
     setBluetoothAddr(bluetooth_addr.c_str());
@@ -112,7 +111,8 @@ WiimoteNode::WiimoteNode(ros::NodeHandle node, ros::NodeHandle private_nh)
   ROS_INFO("Allow all joy sticks to remain at center position until calibrated.");
 
   // FIXME: this can block for a while in the constructor, which isn't very nice.
-  // Can we hand this off to a thread or timer or something?
+  // We have to hand this off to a thread since cwiid can block and sleep while
+  // waiting for the Wiimote to pair.
   if (pairWiimote(pair_timeout))
   {
     ROS_INFO("Wiimote is Paired");
