@@ -85,8 +85,46 @@ float zeroedByCal(uint8_t raw, uint8_t zero, uint8_t one)
 }
 }
 
-WiimoteNode::WiimoteNode()
+WiimoteNode::WiimoteNode(ros::NodeHandle node, ros::NodeHandle private_nh)
 {
+  std::string bluetooth_addr;
+
+  int pair_timeout;
+  double check_connection_interval;
+  private_nh.param("pair_timeout", pair_timeout, 5);
+  private_nh.param("check_connection_interval", check_connection_interval, 0.0);
+
+  if (private_nh.getParam("bluetooth_addr", bluetooth_addr))
+  {
+    setBluetoothAddr(bluetooth_addr.c_str());
+    ROS_INFO("* * * Pairing with %s", getBluetoothAddr());
+  }
+  else
+  {
+    // Initialize with the ANY Bluetooth Address
+    setBluetoothAddr("00:00:00:00:00:00");
+    ROS_INFO("Searching for Wiimotes");
+  }
+
+  ROS_INFO("Allow all joy sticks to remain at center position until calibrated.");
+
+  // FIXME: this can block for a while in the constructor, which isn't very nice.
+  // Can we hand this off to a thread or timer or something?
+  if (pairWiimote(0, pair_timeout))
+  {
+    ROS_INFO("Wiimote is Paired");
+  }
+  else
+  {
+    ROS_ERROR("* * * Wiimote pairing failed.");
+    throw std::runtime_error("Wiimote pairing failed.");
+  }
+
+  if (check_connection_interval > 0.0)
+  {
+    timer_ = private_nh.createTimer(ros::Duration(check_connection_interval), &WiimoteNode::checkConnection, this);
+  }
+
   joy_pub_ = nh_.advertise<sensor_msgs::Joy>("/joy", 1);
   imu_data_pub_ = nh_.advertise<sensor_msgs::Imu>("/imu/data", 1);
   wiimote_state_pub_ = nh_.advertise<wiimote_msgs::State>("/wiimote/state", 1);
@@ -102,9 +140,6 @@ WiimoteNode::WiimoteNode()
       &WiimoteNode::joySetFeedbackCallback, this);
 
   imu_calibrate_srv_ = nh_.advertiseService("/imu/calibrate", &WiimoteNode::serviceImuCalibrateCallback, this);
-
-  // Initialize with the ANY Bluetooth Address
-  setBluetoothAddr("00:00:00:00:00:00");
 
   wiimote_ = nullptr;
 
@@ -942,8 +977,9 @@ void WiimoteNode::setLedState(uint8_t led_state)
   }
 }
 
-void WiimoteNode::checkConnection()
+void WiimoteNode::checkConnection(const ros::TimerEvent &event)
 {
+  (void)event;
   if (wiimote_c::cwiid_set_led(wiimote_, led_state_))
   {
     ROS_INFO("Connection to wiimote lost");
@@ -1555,65 +1591,21 @@ bool WiimoteNode::serviceImuCalibrateCallback(std_srvs::Empty::Request&, std_srv
 
 int main(int argc, char *argv[])
 {
-  bool fed_addr = false;
-  std::string bluetooth_addr;
   ros::init(argc, argv, "wiimote_controller");
+  ros::NodeHandle node;
+  ros::NodeHandle private_nh("~");
 
-  WiimoteNode *wiimote_node;
-
-  wiimote_node = new WiimoteNode();
-
-  if (ros::param::get("~bluetooth_addr", bluetooth_addr))
-  {
-    wiimote_node->setBluetoothAddr(bluetooth_addr.c_str());
-    fed_addr = true;
-  }
-
-  int pair_timeout;
-  double check_connection_interval;
-  ros::param::param<int>("~pair_timeout", pair_timeout, 5);
-  ros::param::param<double>("~check_connection_interval", check_connection_interval, 0.0);
-
-  if (fed_addr)
-  {
-    ROS_INFO("* * * Pairing with %s", wiimote_node->getBluetoothAddr());
-  }
-  else
-  {
-    ROS_INFO("Searching for Wiimotes");
-  }
-
-  ROS_INFO("Allow all joy sticks to remain at center position until calibrated.");
-
-  if (wiimote_node->pairWiimote(0, pair_timeout))
-  {
-    ROS_INFO("Wiimote is Paired");
-  }
-  else
-  {
-    ROS_ERROR("* * * Wiimote pairing failed.");
-    return 2;
-  }
-
-  ros::NodeHandle nh;
-  ros::Timer timer;
-  if (check_connection_interval > 0.0)
-  {
-    timer = nh.createTimer(ros::Duration(check_connection_interval),
-                           boost::bind(&WiimoteNode::checkConnection, wiimote_node));
-  }
+  WiimoteNode wiimote_node(node, private_nh);
 
   ros::Rate loop_rate(10);  // 10Hz
   while (ros::ok())
   {
-    wiimote_node->publish();
+    wiimote_node.publish();
 
     ros::spinOnce();
 
     loop_rate.sleep();
   }
-
-  delete wiimote_node;
 
   ros::shutdown();
 

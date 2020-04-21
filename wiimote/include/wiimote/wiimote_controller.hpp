@@ -53,17 +53,17 @@ namespace wiimote_c
 class WiimoteNode final
 {
 public:
-  WiimoteNode();
+  explicit WiimoteNode(ros::NodeHandle node, ros::NodeHandle private_nh);
   ~WiimoteNode();
+
+  void publish();
+
+private:
   char *getBluetoothAddr();
   void setBluetoothAddr(const char *bt_str);
   bool pairWiimote(int flags, int timeout);
 
-  void publish();
-  void checkConnection();
-  void timerCallback(const ros::TimerEvent&);
-
-private:
+  void checkConnection(const ros::TimerEvent &event);
   int unpairWiimote();
   void setLedState(uint8_t led_state);
   void setRumbleState(uint8_t rumble);
@@ -196,6 +196,8 @@ private:
   uint8_t rumble_ = 0;
 
   uint64_t wiimote_errors = 0;
+
+  ros::Timer timer_;
 
   // Convert wiimote accelerator readings from g's to m/sec^2:
   const double EARTH_GRAVITY_ = 9.80665;  // m/sec^2 @sea_level
